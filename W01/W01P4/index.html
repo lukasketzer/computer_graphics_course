@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="./initShaders.js"></script>
+    <!-- <script type="text/javascript" src="./initShaders2.js"></script> -->
+
+    <script id="vertex-shader" type="x-shader/x-shader">
+        attribute vec4 a_Position;
+        uniform float beta;
+
+        void main() {
+            float s = sin(beta);
+            float c = cos(beta);
+
+            gl_Position.x = -s * a_Position.y + c * a_Position.x;
+            gl_Position.y =  s * a_Position.x + c * a_Position.y;
+            gl_Position.z = 1.0;
+            gl_Position.w = 1.0;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-shader">
+        precision mediump float;
+        void main() {
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        }
+    </script>
+
+    
+    <script type="text/javascript" src="./script.js"></script>
+    <script type="text/javascript" src="./MV.js"></script>
+    <script type="text/javascript" src="./webgl-utils.js"></script>
+    <title>W01P4</title>
+
+</head>
+
+<body>
+    <canvas id="c" height="512" width="512" />
+</body>
+
+
+</html>
