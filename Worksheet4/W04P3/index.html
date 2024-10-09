@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="./initShaders.js"></script>
+    <!-- <script type="text/javascript" src="./initShaders2.js"></script> -->
+
+    <script id="vertex-shader" type="x-shader/x-shader">
+        attribute vec4 a_Position;
+
+        uniform vec4 lightPos;
+        uniform mat4 v_matrix; // view matrix (where the camera looks) (M)
+        uniform mat4 p_matrix; // projections matrix (fov etc, perspectives)
+        
+        uniform vec4 k_d;
+        uniform vec4 L_d;
+
+
+        varying vec4 v_color;
+
+        void main() {
+            gl_Position = p_matrix * v_matrix * a_Position ;
+
+            vec3 w_i = normalize(-lightPos.xyz);
+            float dotProd = dot(normalize(a_Position.xyz), w_i);
+
+            vec4 L_rd = k_d * L_d * max(dotProd, 0.0);
+            vec4 L_ra = k_d * L_d;
+            vec4 L_o = L_rd;
+            L_o.a = 1.0;
+            v_color = L_o;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-shader">
+        precision mediump float;
+        varying vec4 v_color;
+        void main() {
+            gl_FragColor = v_color;
+        }
+    </script>
+
+
+    <script type="text/javascript" src="./script.js"></script>
+    <script type="text/javascript" src="./MV.js"></script>
+    <script type="text/javascript" src="./webgl-utils.js"></script>
+    <title>W04P3</title>
+
+</head>
+
+<body>
+    <canvas id="c" height="512" width="512"></canvas>
+    <button id="increment">Increment</button>
+    <button id="decrement">Decrement</button>
+</body>
+
+
+</html>

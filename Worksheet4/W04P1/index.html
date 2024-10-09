@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="./initShaders.js"></script>
+    <!-- <script type="text/javascript" src="./initShaders2.js"></script> -->
+
+    <script id="vertex-shader" type="x-shader/x-shader">
+        attribute vec4 a_Position;
+        uniform mat4 v_matrix; // view matrix (where the camera looks)
+        uniform mat4 p_matrix; // projections matrix (fov etc, perspectives)
+
+        void main() {
+            gl_Position =  p_matrix * v_matrix * a_Position ;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-shader">
+        precision mediump float;
+        void main() {
+            gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
+        }
+    </script>
+
+
+    <script type="text/javascript" src="./script.js"></script>
+    <script type="text/javascript" src="./MV.js"></script>
+    <script type="text/javascript" src="./webgl-utils.js"></script>
+    <title>W04P1</title>
+
+</head>
+
+<body>
+    <canvas id="c" height="512" width="512"></canvas>
+    <button id="increment">Increment</button>
+    <button id="decrement">Decrement</button>
+</body>
+
+
+</html>
