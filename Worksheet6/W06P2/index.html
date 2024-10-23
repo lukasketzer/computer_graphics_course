@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="./initShaders.js"></script>
+    <script type="text/javascript" src="./OBJParser.js"></script>
+    <!-- <script type="text/javascript" src="./initShaders2.js"></script> -->
+
+    <script id="vertex-shader" type="x-shader/x-shader">
+
+        attribute vec4 vPosition_a; //  position of the shape
+        attribute vec2 texCoords_a; //  textureCordds
+
+        uniform mat4 v_matrix;  // view matrix (where the camera looks) (M)
+        uniform mat4 p_matrix;  // projections matrix (fov etc, perspectives)
+        uniform mat4 t_matrix;  // transformations matrix
+
+        
+        varying vec2 fTexCoord;
+        void main() {
+            fTexCoord = texCoords_a;
+            gl_Position = p_matrix * v_matrix * t_matrix * vPosition_a;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-shader">
+        precision mediump float;
+        uniform sampler2D texMap;
+        varying vec2 fTexCoord;
+        
+        void main() {
+            gl_FragColor = texture2D(texMap, fTexCoord);
+        }
+    </script>
+
+
+    <script type="text/javascript" src="./script.js"></script>
+    <script type="text/javascript" src="./MV.js"></script>
+    <script type="text/javascript" src="./webgl-utils.js"></script>
+    <title>W06P2</title>
+
+</head>
+
+<body>
+    <h1>TODO: Explain filter effects</h1>
+    <div style="display: flex; flex-direction: row; align-items: center;">
+        <canvas id="c" height="512" width="512"></canvas>
+    </div>
+    <div>
+        <select id="wrappingModes" name="wrappingModes">
+            <option value="repeat">Repeat</option>
+            <option value="clampToEdge">Clamp To Edge</option>
+        </select>
+    </div>
+    <div>
+        <select id="textureFilteringModes" name="textureFilteringModes">
+            <option value="gl.NEAREST">NEAREST</option>
+            <option value="gl.LINEAR">LINEAR</option>
+            <option value="gl.NEAREST_MIPMAP_NEAREST">NEAREST_MIPMAP_NEAREST</option>
+            <option value="gl.LINEAR_MIPMAP_NEAREST">LINEAR_MIPMAP_NEAREST</option>
+            <option value="gl.NEAREST_MIPMAP_LINEAR">NEAREST_MIPMAP_LINEAR</option>
+            <option value="gl.LINEAR_MIPMAP_LINEAR">LINEAR_MIPMAP_LINEAR</option>
+        </select>
+    </div>
+
+</body>
+
+
+</html>

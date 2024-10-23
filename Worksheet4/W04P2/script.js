@@ -20,16 +20,13 @@ function render(numPoints) {
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     gl.drawArrays(gl.TRIANGLES, 0, numPoints);
-    // gl.drawArrays(gl.POINTS, 0, numPoints);
 }
 
 // From the book 
-
 function triangle(a, b, c, pointsArray) {
     pointsArray.push(a);
     pointsArray.push(b); // maybe wrong
     pointsArray.push(c);
-    // index += 3;
 }
 
 function divideTriangle(a, b, c, count, pointsArray) {
@@ -57,11 +54,6 @@ function tetrahedron(pointsArray, a, b, c, d, n) {
 
 function initSphere(gl, numSubdivs) {
     // init sphere
-    // let va = vec4(0.0, 0.0, -1.0, 1);
-    // let vb = vec4(0.0, 0.942809, 0.333333, 1);
-    // let vc = vec4(-0.816497, -0.471405, 0.333333, 1);
-    // let vd = vec4(0.816497, -0.471405, 0.333333, 1);
-
     let va = vec4(0.0, 0.0, 1.0, 1);
     let vb = vec4(0.0, 0.942809, -0.333333, 1);
     let vc = vec4(-0.816497, -0.471405, -0.333333, 1);
@@ -84,9 +76,9 @@ window.onload = () => {
 
     let incrementButton = document.getElementById("increment")
     let decrementButton = document.getElementById("decrement")
+
     gl.enable(gl.CULL_FACE)
-
-
+    gl.enable(gl.DEPTH_TEST)
 
     let ext = gl.getExtension('OES_element_index_uint'); // don't remove
 

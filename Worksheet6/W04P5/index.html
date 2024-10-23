@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="./initShaders.js"></script>
+    <!-- <script type="text/javascript" src="./initShaders2.js"></script> -->
+
+    <script id="vertex-shader" type="x-shader/x-shader">
+        // todo do modelViewMatrix on cpu
+
+        attribute vec4 vPosition_a; // normal vector / position of the shape
+
+        uniform mat4 v_matrix;  // view matrix (where the camera looks) (M)
+        uniform mat4 p_matrix;  // projections matrix (fov etc, perspectives)
+        uniform mat4 t_matrix;  // transformations matrix
+
+        varying vec4 normal;
+        void main() {
+            normal = vPosition_a;
+
+            gl_Position = p_matrix * v_matrix * t_matrix * vPosition_a;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-shader">
+        precision mediump float;
+        varying vec4 normal; 
+        void main() {
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+        }
+    </script>
+
+
+    <script type="text/javascript" src="./script.js"></script>
+    <script type="text/javascript" src="./MV.js"></script>
+    <script type="text/javascript" src="./webgl-utils.js"></script>
+    <title>W06P3</title>
+
+</head>
+
+<body>
+    <div style="display: flex; flex-direction: row; align-items: center;">
+        <canvas id="c" height="512" width="512"></canvas>
+        <div style="margin: 2rem;">
+            <button id="increment">Increment</button>
+            <button id="decrement">Decrement</button>
+            <button id="orbiting">Toggle Orbiting</button>
+        </div>
+    </div>
+
+</body>
+
+
+</html>

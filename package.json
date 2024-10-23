@@ -1,0 +1,11 @@
+{
+  "name": "ComputerGraphics",
+  "version": "1.0.0",
+  "main": ".",
+  "repository": "git@github.com:lukasketzer/computer_graphics_course.git",
+  "author": "Lukas Ketzer <lukas.a.ketzer@tum.de>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "python3 -m http.server"
+  }
+}

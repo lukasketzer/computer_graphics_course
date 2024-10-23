@@ -11,16 +11,13 @@ function render(gl, numPoints) {
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
     gl.drawArrays(gl.TRIANGLES, 0, numPoints);
-    // gl.drawArrays(gl.POINTS, 0, numPoints);
 }
 
 // From the book 
-
 function triangle(a, b, c, pointsArray) {
     pointsArray.push(a);
     pointsArray.push(b); // maybe wrong
     pointsArray.push(c);
-    // index += 3;
 }
 
 function divideTriangle(a, b, c, count, pointsArray) {
@@ -53,11 +50,6 @@ function initSphere(gl, numSubdivs) {
     let vc = vec4(-0.816497, -0.471405, -0.333333, 1);
     let vd = vec4(0.816497, -0.471405, -0.333333, 1);
 
-    // let va = vec4(0.0, 0.0, 1.0, 1);
-    // let vb = vec4(0.0, 0.942809, -0.333333, 1);
-    // let vc = vec4(-0.816497, -0.471405, -0.333333, 1);
-    // let vd = vec4(0.816497, -0.471405, -0.333333, 1);
-
     let sphere = []
     tetrahedron(sphere, va, vb, vc, vd, numSubdivs)
     gl.bindBuffer(gl.ARRAY_BUFFER, gl.vBuffer);
@@ -75,9 +67,9 @@ window.onload = () => {
 
     let incrementButton = document.getElementById("increment")
     let decrementButton = document.getElementById("decrement")
+
     gl.enable(gl.CULL_FACE)
-
-
+    gl.enable(gl.DEPTH_TEST)
 
     let ext = gl.getExtension('OES_element_index_uint'); // don't remove
 
@@ -93,21 +85,29 @@ window.onload = () => {
     gl.useProgram(program);
 
 
-    // // camera / point-of-view
-    // let eye = vec3(0.5, 0.5, 5.5)
+    // camera / point-of-view
     let eye = vec3(0.0, 0.0, 5.0)
     let at = vec3(0, 0, 0)
     let up = vec3(0, 1, 0)
     let v = lookAt(eye, at, up)
-    let VLoc = gl.getUniformLocation(program, "v_matrix")
-    gl.uniformMatrix4fv(VLoc, false, flatten(v))
+    // let VLoc = gl.getUniformLocation(program, "v_matrix")
+    // gl.uniformMatrix4fv(VLoc, false, flatten(v))
 
     // fov settings (Projection Matrix)
     let near = 0.1
     let far = 50.0
     let p = perspective(45, canvas.width / canvas.height, near, far)
-    let PLoc = gl.getUniformLocation(program, "p_matrix")
-    gl.uniformMatrix4fv(PLoc, false, flatten(p))
+    // let PLoc = gl.getUniformLocation(program, "p_matrix")
+    // gl.uniformMatrix4fv(PLoc, false, flatten(p))
+
+    // Transformation matrix
+    let T = mat4()
+    // let TLoc = gl.getUniformLocation(program, "t_matrix")
+    // gl.uniformMatrix4fv(TLoc, false, flatten(T))
+
+    let PVT = mult(p, mult(v, T))
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "pvt_matrix"), false, flatten(PVT))
+
 
     // light
     let lightPos = vec4(0.0, 0.0, -1.0, 1.0)
@@ -129,7 +129,8 @@ window.onload = () => {
     function animate() {
         alpha += 0.1;
         v = lookAt(vec3(radius * Math.sin(alpha), 0.0, radius * Math.cos(alpha)), vec3(0.0, 0.0, 0.0), vec3(0, 1, 0))
-        gl.uniformMatrix4fv(VLoc, false, flatten(v))
+        PVT = mult(p, mult(v, T))
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "pvt_matrix"), false, flatten(PVT))
 
 
         render(gl, numSphere);
@@ -146,7 +147,6 @@ window.onload = () => {
 
         sphere = []
         numSphere = initSphere(gl, numSubdivs)
-        render(numSphere)
     })
 
     decrementButton.addEventListener("click", () => {
@@ -157,7 +157,6 @@ window.onload = () => {
 
         sphere = []
         numSphere = initSphere(gl, numSubdivs)
-        render(numSphere)
     })
 
 

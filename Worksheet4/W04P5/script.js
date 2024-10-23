@@ -257,7 +257,7 @@ window.onload = () => {
 
     emittedRadianceSlider.addEventListener("input", () => {
         specularLight = floatToVec4(emittedRadianceSlider.value)
-        setSpecularColor(program, specularLight)
+        setSpecularLight(program, specularLight)
     })
 
     ambientRadianceSlider.addEventListener("input", () => {

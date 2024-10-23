@@ -7,29 +7,18 @@ function setupWebGL(canvas) {
     return WebGLUtils.setupWebGL(canvas);
 }
 
-// maybe whole class useless for now
-class PointsArray {
-    constructor() {
-        this.pointsArray = []
-        this.index = 0
-        this.numPoints = this.pointsArray.length // maybe useless
-    }
-}
 
 function render(numPoints) {
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT)
     gl.drawArrays(gl.TRIANGLES, 0, numPoints);
-    // gl.drawArrays(gl.POINTS, 0, numPoints);
 }
 
 // From the book 
-
 function triangle(a, b, c, pointsArray) {
     pointsArray.push(a);
     pointsArray.push(b); // maybe wrong
     pointsArray.push(c);
-    // index += 3;
 }
 
 function divideTriangle(a, b, c, count, pointsArray) {
@@ -77,11 +66,6 @@ window.onload = () => {
     gl = setupWebGL(canvas);
     let program = initShaders(gl, "vertex-shader", "fragment-shader");
 
-    let incrementButton = document.getElementById("increment")
-    let decrementButton = document.getElementById("decrement")
-
-
-
     let ext = gl.getExtension('OES_element_index_uint'); // don't remove
 
     // init Buffers
@@ -95,8 +79,7 @@ window.onload = () => {
     gl.enableVertexAttribArray(vPosition);
     gl.useProgram(program);
 
-
-    // // camera / point-of-view
+    // camera / point-of-view
     let eye = vec3(0.5, 0.5, 5.5)
     let at = vec3(0, 0, 0)
     let up = vec3(0, 1, 0)
@@ -104,7 +87,7 @@ window.onload = () => {
     let VLoc = gl.getUniformLocation(program, "v_matrix")
     gl.uniformMatrix4fv(VLoc, false, flatten(v))
 
-    // // fov settings
+    // fov settings
     let near = 0.1
     let far = 50.0
     let p = perspective(45, canvas.width / canvas.height, near, far)
@@ -113,6 +96,9 @@ window.onload = () => {
 
     // clear canvas and set background
     render(numSphere)
+
+    let incrementButton = document.getElementById("increment")
+    let decrementButton = document.getElementById("decrement")
 
     // event listener
     incrementButton.addEventListener("click", () => {
