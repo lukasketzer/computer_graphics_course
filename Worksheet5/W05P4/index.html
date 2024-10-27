@@ -14,9 +14,7 @@
         attribute vec4 vNormal_a;  // normal vector
         attribute vec4 diffuseColor_a;      // k_d / k_a object color
 
-        uniform mat4 v_matrix;  // view matrix (where the camera looks) (M)
-        uniform mat4 p_matrix;  // projections matrix (fov etc, perspectives)
-        uniform mat4 t_matrix;  // transformations matrix
+        uniform mat4 pvt_matrix;  // transformations matrix
 
         
         varying vec4 vPosition;
@@ -27,7 +25,7 @@
             vPosition = vNormal_a;
             diffuseColor = diffuseColor_a;
 
-            gl_Position = p_matrix * v_matrix * t_matrix * vPosition_a;
+            gl_Position = pvt_matrix * vPosition_a;
         }
     </script>
 

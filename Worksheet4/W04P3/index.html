@@ -11,10 +11,7 @@
         attribute vec4 a_Position;
 
         uniform vec4 lightPos;
-        uniform mat4 v_matrix; // view matrix (where the camera looks) (M)
-        uniform mat4 p_matrix; // projections matrix (fov etc, perspectives)
-        uniform mat4 t_matrix; // tranformation matrix
-        
+       
         uniform mat4 pvt_matrix; // tranformation matrix
 
         uniform vec4 k_d;
@@ -23,8 +20,6 @@
         varying vec4 v_color;
 
         void main() {
-            // gl_Position = p_matrix * v_matrix * t_matrix * a_Position ;
-            gl_Position = pvt_matrix * a_Position ;
 
             vec3 w_i = normalize(-lightPos.xyz);
             float dotProd = dot(normalize(a_Position.xyz), w_i);
@@ -34,6 +29,8 @@
             vec4 L_o = L_rd;
             L_o.a = 1.0;
             v_color = L_o;
+
+            gl_Position = pvt_matrix * a_Position ;
         }
     </script>
 

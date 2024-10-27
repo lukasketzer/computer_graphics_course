@@ -11,67 +11,31 @@
         // todo do modelViewMatrix on cpu
 
         attribute vec4 vPosition_a; // normal vector / position of the shape
-        uniform vec4 vEye_a;      // ka was das ist, glaube eye vector
-        uniform mat4 v_matrix;  // view matrix (where the camera looks) (M)
-        uniform mat4 p_matrix;  // projections matrix (fov etc, perspectives)
-        uniform mat4 t_matrix;  // transformations matrix
-
-        uniform vec4 lightPos_a;
-        uniform vec4 ambientLight_a;      // L_a
-
-        uniform vec4 diffuseLight_a;       // L_d light intesitiy
-        uniform vec4 diffuseColor_a;      // k_d / k_a object color
-
-        uniform vec4 specularColor_a;     // k_s light color
-        uniform vec4 specularLight_a;     // L_i
-
-        uniform float shininess_a;
-
+        uniform mat4 pvt_matrix;  // transformations matrix
 
         varying vec4 vPosition;
-        varying vec4 vEye;
-
-        varying vec4 lightPos;
-        varying vec4 ambientLight;      // L_a
-
-        varying vec4 diffuseLight;       // L_d light intesitiy
-        varying vec4 diffuseColor;      // k_d / k_a object color
-
-        varying vec4 specularColor;     // k_s light color
-        varying vec4 specularLight;     // L_i
-
-        varying float shininess;
 
         void main() {
-            lightPos = lightPos_a;
             vPosition = vPosition_a;
-            vEye = vEye_a;
-            ambientLight = ambientLight_a;
-            diffuseLight = diffuseLight_a;
-            diffuseColor = diffuseColor_a;
-            specularColor = specularColor_a;
-            specularLight = specularLight_a;
-            shininess = shininess_a;
-
-            gl_Position = p_matrix * v_matrix * t_matrix * vPosition_a;
+            gl_Position = pvt_matrix * vPosition_a;
         }
     </script>
 
     <script id="fragment-shader" type="x-shader/x-shader">
         precision mediump float;
         varying vec4 vPosition;
-        varying vec4 vEye;
 
-        varying vec4 lightPos;
-        varying vec4 ambientLight;      // L_a
+        uniform vec4 vEye;      // ka was das ist, glaube eye vector
+        uniform vec4 lightPos;
+        uniform vec4 ambientLight;      // L_a
 
-        varying vec4 diffuseLight;       // L_d light intesitiy
-        varying vec4 diffuseColor;      // k_d / k_a object color
+        uniform vec4 diffuseColor;       // L_d light intesitiy
+        uniform vec4 diffuseLight;       // L_d light intesitiy
 
-        varying vec4 specularColor;     // k_s light color
-        varying vec4 specularLight;     // L_i
+        uniform vec4 specularColor;     // k_s light color
+        uniform vec4 specularLight;     // L_i
 
-        varying float shininess;
+        uniform float shininess;
 
         vec4 ambient, diffuse, specular; 
 

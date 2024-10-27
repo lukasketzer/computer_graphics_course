@@ -121,9 +121,6 @@ window.onload = async () => {
     let up = vec3(0, 1, 0)
     let v = lookAt(eye, at, up)
 
-    let VLoc = gl.getUniformLocation(program, "v_matrix")
-    gl.uniformMatrix4fv(VLoc, false, flatten(v))
-
     let vEyeLoc = gl.getUniformLocation(program, "vEye")
     gl.uniform4fv(vEyeLoc, flatten(vec4(eye, 1.0)));
 
@@ -132,15 +129,12 @@ window.onload = async () => {
     let near = 0.1
     let far = 50.0
     let p = perspective(45, canvas.width / canvas.height, near, far)
-    let PLoc = gl.getUniformLocation(program, "p_matrix")
-    gl.uniformMatrix4fv(PLoc, false, flatten(p))
 
     // Transformation matrix
     let T = mat4()
-    let TLoc = gl.getUniformLocation(program, "t_matrix")
-    gl.uniformMatrix4fv(TLoc, false, flatten(T))
 
-
+    let PVT = mult(p, mult(v, T))
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "pvt_matrix"), false, flatten(PVT))
 
     // phong filter
     let emittedRadianceSlider = document.getElementById("emittedRadianceSlider");
@@ -186,8 +180,11 @@ window.onload = async () => {
 
         eye = vec3(radius * Math.sin(alpha), 0.0, radius * Math.cos(alpha))
         v = lookAt(eye, vec3(0.0, 0.0, 0.0), vec3(0, 1, 0))
-        gl.uniformMatrix4fv(VLoc, false, flatten(v))
+
         gl.uniform4fv(vEyeLoc, vec4(eye, 1.0))
+        PVT = mult(p, mult(v, T))
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "pvt_matrix"), false, flatten(PVT))
+
 
 
         render(gl, drawingInfo.indices.length);

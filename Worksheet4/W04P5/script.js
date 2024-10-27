@@ -19,7 +19,6 @@ function triangle(a, b, c, pointsArray) {
     pointsArray.push(a);
     pointsArray.push(b); // maybe wrong
     pointsArray.push(c);
-    // index += 3;
 }
 
 function divideTriangle(a, b, c, count, pointsArray) {
@@ -61,22 +60,22 @@ function initSphere(gl, numSubdivs) {
 }
 
 function setShininess(program, shininess) {
-    gl.uniform1f(gl.getUniformLocation(program, "shininess_a"), shininess)
+    gl.uniform1f(gl.getUniformLocation(program, "shininess"), shininess)
 }
 function setDiffuseColor(program, diffuseColor) {
-    gl.uniform4fv(gl.getUniformLocation(program, "diffuseColor_a"), flatten(diffuseColor))
+    gl.uniform4fv(gl.getUniformLocation(program, "diffuseColor"), flatten(diffuseColor))
 }
 function setDiffuseLight(program, diffuseLight) {
-    gl.uniform4fv(gl.getUniformLocation(program, "diffuseLight_a"), flatten(diffuseLight))
+    gl.uniform4fv(gl.getUniformLocation(program, "diffuseLight"), flatten(diffuseLight))
 }
 function setAmbientLight(program, ambientLight) {
-    gl.uniform4fv(gl.getUniformLocation(program, "ambientColor_a"), flatten(ambientLight))
+    gl.uniform4fv(gl.getUniformLocation(program, "ambientColor"), flatten(ambientLight))
 }
 function setSpecularColor(program, specularColor) {
-    gl.uniform4fv(gl.getUniformLocation(program, "specularColor_a"), flatten(specularColor))
+    gl.uniform4fv(gl.getUniformLocation(program, "specularColor"), flatten(specularColor))
 }
 function setSpecularLight(program, specularLight) {
-    gl.uniform4fv(gl.getUniformLocation(program, "specularLight_a"), flatten(specularLight))
+    gl.uniform4fv(gl.getUniformLocation(program, "specularLight"), flatten(specularLight))
 }
 
 
@@ -133,10 +132,8 @@ window.onload = () => {
     let at = vec3(0, 0, 0)
     let up = vec3(0, 1, 0)
     let v = lookAt(eye, at, up)
-    let VLoc = gl.getUniformLocation(program, "v_matrix")
-    gl.uniformMatrix4fv(VLoc, false, flatten(v))
 
-    let vEyeLoc = gl.getUniformLocation(program, "vEye_a")
+    let vEyeLoc = gl.getUniformLocation(program, "vEye")
     gl.uniform4fv(vEyeLoc, flatten(vec4(eye, 1.0)));
 
 
@@ -144,13 +141,13 @@ window.onload = () => {
     let near = 0.1
     let far = 50.0
     let p = perspective(45, canvas.width / canvas.height, near, far)
-    let PLoc = gl.getUniformLocation(program, "p_matrix")
-    gl.uniformMatrix4fv(PLoc, false, flatten(p))
 
     // Transformation matrix
     let T = mat4()
-    let TLoc = gl.getUniformLocation(program, "t_matrix")
-    gl.uniformMatrix4fv(TLoc, false, flatten(T))
+
+
+    let PVT = mult(p, mult(v, T))
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "pvt_matrix"), false, flatten(PVT))
 
 
 
@@ -163,7 +160,7 @@ window.onload = () => {
 
     // light / color stuff
     let lightPos = vec4(0.0, 0.0, -1.0, 1.0)
-    gl.uniform4fv(gl.getUniformLocation(program, "lightPos_a"), flatten(lightPos))
+    gl.uniform4fv(gl.getUniformLocation(program, "lightPos"), flatten(lightPos))
 
 
     let shininess = parseFloat(shininessSlider.value)
@@ -188,8 +185,6 @@ window.onload = () => {
     setSpecularLight(program, specularLight)
 
 
-
-
     let orbiting = true // boolean that sets orbiting
     let alpha = 0.0
     let radius = 6.8
@@ -201,9 +196,11 @@ window.onload = () => {
 
         eye = vec3(radius * Math.sin(alpha), 0.0, radius * Math.cos(alpha))
         v = lookAt(eye, vec3(0.0, 0.0, 0.0), vec3(0, 1, 0))
-        gl.uniformMatrix4fv(VLoc, false, flatten(v))
-        gl.uniform4fv(vEyeLoc, vec4(eye, 1.0))
 
+        PVT = mult(p, mult(v, T))
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "pvt_matrix"), false, flatten(PVT))
+
+        gl.uniform4fv(vEyeLoc, vec4(eye, 1.0))
 
         render(gl, numSphere);
         requestAnimationFrame(animate);
@@ -219,7 +216,6 @@ window.onload = () => {
 
         sphere = []
         numSphere = initSphere(gl, numSubdivs)
-        // render(gl, numSphere)
     })
 
     decrementButton.addEventListener("click", () => {
@@ -227,19 +223,15 @@ window.onload = () => {
             numSubdivs -= 1
         }
 
-
         sphere = []
         numSphere = initSphere(gl, numSubdivs)
-        // render(gl, numSphere)
     })
 
     orbitingButton.addEventListener("click", () => {
         alpha = 0.0
         orbiting = !orbiting
 
-
         numSphere = initSphere(gl, numSubdivs)
-        // render(gl, numSphere)
     })
 
 
@@ -262,8 +254,6 @@ window.onload = () => {
 
     ambientRadianceSlider.addEventListener("input", () => {
         ambientLight = floatToVec4(ambientRadianceSlider.value)
-        // probaly wrong
-    
         setDiffuseLight(program, ambientLight)
         setAmbientLight(program, ambientLight)
     })

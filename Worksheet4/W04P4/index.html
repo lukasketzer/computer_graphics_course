@@ -11,10 +11,9 @@
         // todo do modelViewMatrix on cpu
 
         attribute vec4 vPosition; // normal vector / position of the shape
+        uniform mat4 pvt_matrix;
+
         uniform vec4 vEye;      // ka was das ist, glaube eye vector
-        uniform mat4 v_matrix;  // view matrix (where the camera looks) (M)
-        uniform mat4 p_matrix;  // projections matrix (fov etc, perspectives)
-        uniform mat4 t_matrix;  // transformations matrix
 
         uniform vec4 lightPos;
         uniform vec4 ambientLight;      // L_a
@@ -47,7 +46,7 @@
             fColor.a = 1.0;
             v_color = fColor;
 
-            gl_Position = p_matrix * v_matrix * t_matrix * vPosition;
+            gl_Position = pvt_matrix * vPosition;
         }
     </script>
 

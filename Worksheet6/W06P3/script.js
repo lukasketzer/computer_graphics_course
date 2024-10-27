@@ -7,7 +7,6 @@ function setupWebGL(canvas) {
     return WebGLUtils.setupWebGL(canvas);
 }
 
-
 function render(gl, numPoints) {
     gl.clearColor(0.3921, 0.5843, 0.9294, 1.0);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT)
@@ -19,7 +18,6 @@ function triangle(a, b, c, pointsArray) {
     pointsArray.push(a);
     pointsArray.push(b); // maybe wrong
     pointsArray.push(c);
-    // index += 3;
 }
 
 function divideTriangle(a, b, c, count, pointsArray) {
@@ -60,45 +58,7 @@ function initSphere(gl, numSubdivs) {
     return sphere.length
 }
 
-function setShininess(program, shininess) {
-    gl.uniform1f(gl.getUniformLocation(program, "shininess_a"), shininess)
-}
-function setDiffuseColor(program, diffuseColor) {
-    gl.uniform4fv(gl.getUniformLocation(program, "diffuseColor_a"), flatten(diffuseColor))
-}
-function setDiffuseLight(program, diffuseLight) {
-    gl.uniform4fv(gl.getUniformLocation(program, "diffuseLight_a"), flatten(diffuseLight))
-}
-function setAmbientLight(program, ambientLight) {
-    gl.uniform4fv(gl.getUniformLocation(program, "ambientColor_a"), flatten(ambientLight))
-}
-function setSpecularColor(program, specularColor) {
-    gl.uniform4fv(gl.getUniformLocation(program, "specularColor_a"), flatten(specularColor))
-}
-function setSpecularLight(program, specularLight) {
-    gl.uniform4fv(gl.getUniformLocation(program, "specularLight_a"), flatten(specularLight))
-}
 
-
-function floatToColor(value) {
-    if (typeof (value) == "string") {
-        value = parseFloat(value)
-    }
-
-    value = Math.trunc(value * 1000000)
-    let r = Math.floor((value / 10000) % 100)
-    let g = Math.floor((value / 100) % 100)
-    let b = Math.floor(value % 100)
-
-    return vec4(r / 99, g / 99, b / 99, 1.0)
-}
-function floatToVec4(value) {
-    if (typeof (value) == "string") {
-        value = parseFloat(value)
-    }
-
-    return vec4(value, value, value, 1.0)
-}
 
 
 window.onload = () => {
@@ -139,39 +99,46 @@ window.onload = () => {
         gl.generateMipmap(gl.TEXTURE_2D);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT);
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MINMAP_NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR_MINMAP_NEAREST);
     };
     image.src = './earth.jpg';
 
     gl.useProgram(program);
+    
+
+    // lighting
+    let lightPos = vec4(0.0, 0.0, -1.0, 1.0)
+    gl.uniform4fv(gl.getUniformLocation(program, "lightPos"), flatten(lightPos))
+
+
 
 
     // camera / point-of-view (view-matrix)
-    let eye = vec3(0.5, 0.5, 5.5)
-    let at = vec3(0, 0, -1.0)
+    let eye = vec3(0.5, 0.5, 0.5)
+    let at = vec3(0, 0, 1.0)
     let up = vec3(0, 1, 0)
     let v = lookAt(eye, at, up)
 
-    let VLoc = gl.getUniformLocation(program, "v_matrix")
-    gl.uniformMatrix4fv(VLoc, false, flatten(v))
+    gl.uniform4fv(gl.getUniformLocation(program, "vEye"), flatten(vec4(eye, 1.0)));
 
     // fov settings (Projection Matrix)
     let near = 0.1
     let far = 100.0
     let p = perspective(90, canvas.width / canvas.height, near, far)
-    let PLoc = gl.getUniformLocation(program, "p_matrix")
-    gl.uniformMatrix4fv(PLoc, false, flatten(p))
-
     // Transformation matrix
     let T = mat4()
-    let TLoc = gl.getUniformLocation(program, "t_matrix")
-    gl.uniformMatrix4fv(TLoc, false, flatten(T))
+
+    let PVT = mult(p, mult(v, T))
+    gl.uniformMatrix4fv(gl.getUniformLocation(program, "pvt_matrix"), false, flatten(PVT))
+
+
+    // draw texture onto spehere
 
 
     let orbiting = true // boolean that sets orbiting
     let alpha = 0.0
-    let radius = 6.8
+    let radius = 1.8
 
     function animate() {
         if (!orbiting) {
@@ -179,8 +146,10 @@ window.onload = () => {
         }
 
         eye = vec3(radius * Math.sin(alpha), 0.0, radius * Math.cos(alpha))
+        gl.uniform4fv(gl.getUniformLocation(program, "vEye"), flatten(vec4(eye, 1.0)));
         v = lookAt(eye, vec3(0.0, 0.0, 0.0), vec3(0, 1, 0))
-        gl.uniformMatrix4fv(VLoc, false, flatten(v))
+        PVT = mult(p, mult(v, T))
+        gl.uniformMatrix4fv(gl.getUniformLocation(program, "pvt_matrix"), false, flatten(PVT))
 
         render(gl, numSphere);
         requestAnimationFrame(animate);
@@ -198,7 +167,7 @@ window.onload = () => {
     })
 
     decrementButton.addEventListener("click", () => {
-        if (numSubdivs > 1) {
+        if (numSubdivs > 0) {
             numSubdivs -= 1
         }
         sphere = []
@@ -206,7 +175,6 @@ window.onload = () => {
     })
 
     orbitingButton.addEventListener("click", () => {
-        alpha = 0.0
         orbiting = !orbiting
         numSphere = initSphere(gl, numSubdivs)
     })
