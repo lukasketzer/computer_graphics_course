@@ -138,14 +138,14 @@ window.onload = () => {
 
     let orbiting = true // boolean that sets orbiting
     let alpha = 0.0
-    let radius = 1.8
+    let radius = 2.8
 
     function animate() {
         if (!orbiting) {
             alpha += 0.01;
         }
 
-        eye = vec3(radius * Math.sin(alpha), 0.0, radius * Math.cos(alpha))
+        eye = vec3(radius * Math.sin(alpha), 0.5, radius * Math.cos(alpha))
         gl.uniform4fv(gl.getUniformLocation(program, "vEye"), flatten(vec4(eye, 1.0)));
         v = lookAt(eye, vec3(0.0, 0.0, 0.0), vec3(0, 1, 0))
         PVT = mult(p, mult(v, T))
