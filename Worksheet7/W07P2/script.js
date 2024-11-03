@@ -150,17 +150,42 @@ window.onload = () => {
 
         if (g_tex_ready >= 6) {
             eye = vec3(radius * Math.sin(alpha), 0.5, radius * Math.cos(alpha))
+            at = vec3(0.0, 0.0, 0.0)
+            up = vec3(0, 1, 0)
+            v = lookAt(eye, at, up)
+
             gl.uniform4fv(gl.getUniformLocation(program, "vEye"), flatten(vec4(eye, 1.0)));
-            v = lookAt(eye, vec3(0.0, 0.0, 0.0), vec3(0, 1, 0))
             PVT = mult(p, mult(v, T))
             gl.uniformMatrix4fv(gl.getUniformLocation(program, "pvt_matrix"), false, flatten(PVT))
-            
+            let Mtex = mat4()
+            gl.uniformMatrix4fv(gl.getUniformLocation(program, "Mtex"), false, flatten(Mtex))
+
 
             gl.drawArrays(gl.TRIANGLES, 0, sphere.length);
 
 
             PVT = mult(mat4(), mult(mat4(), mat4()))
             gl.uniformMatrix4fv(gl.getUniformLocation(program, "pvt_matrix"), false, flatten(PVT))
+            var inv_V = inverse(v)
+            var new_V = mat4()
+            new_V[0][0] = inv_V[0][0]
+            new_V[0][1] = inv_V[0][1]
+            new_V[0][2] = inv_V[0][2]
+            new_V[0][3] = 0
+            new_V[1][0] = inv_V[1][0]
+            new_V[1][1] = inv_V[1][1]
+            new_V[1][2] = inv_V[1][2]
+            new_V[1][3] = 0
+            new_V[2][0] = inv_V[2][0]
+            new_V[2][1] = inv_V[2][1]
+            new_V[2][2] = inv_V[2][2]
+            new_V[2][3] = 0
+            new_V[3][0] = 0
+            new_V[3][1] = 0
+            new_V[3][2] = 0
+            new_V[3][3] = 0
+            Mtex = mult(inv_V, inverse(p))
+            gl.uniformMatrix4fv(gl.getUniformLocation(program, "Mtex"), false, flatten(Mtex))
 
             gl.drawArrays(gl.TRIANGLES, sphere.length, backgroud.length);
 

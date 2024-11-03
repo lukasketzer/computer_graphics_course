@@ -31,28 +31,25 @@
 
         
         uniform samplerCube texMap;
+        uniform mat4 Mtex;
         
 
-        vec2 fTexCoord;
+        vec4 fTexCoord;
         const float PI = 3.14159265359;
-        float u, v;
+
         vec4 diffuseColor, diffuseLight;
         vec4 ambientLight, specularColor, specularLight;
         vec4 ambient, diffuse, specular; 
         float shininess;
         void main() {
 
-            // uv mapping
-            
-            u = 1.0 - atan(normal.z, normal.x) / (2.0 * PI);
-            v = acos(normal.y) / PI;
-            fTexCoord.x = u;
-            fTexCoord.y = v;
-            
+            fTexCoord = Mtex * normal;
+           
 
 
             // lighting
-            diffuseColor = textureCube(texMap, normal.xyz);
+            diffuseColor = textureCube(texMap, fTexCoord.xyz);
+
             diffuseLight = vec4(1.0, 1.0, 1.0, 1.0);
             ambientLight = vec4(0.5, 0.5, 0.5, 1.0);
             specularColor = vec4(0.4, 0.4, 0.4, 1.0);
