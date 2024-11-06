@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script type="text/javascript" src="./initShaders.js"></script>
+    <script type="text/javascript" src="./OBJParser.js"></script>
+    <!-- <script type="text/javascript" src="./initShaders2.js"></script> -->
+
+    <script id="vertex-shader" type="x-shader/x-shader">
+
+        attribute vec4 vPosition_a; //  position of the shape
+        attribute vec2 texCoords_a; //  textureCordds
+
+        uniform mat4 pvt_matrix;  // view matrix (where the camera looks) (M)
+         
+        varying vec2 fTexCoord;
+        void main() {
+            fTexCoord = texCoords_a;
+            gl_Position = pvt_matrix * vPosition_a;
+        }
+    </script>
+
+    <script id="fragment-shader" type="x-shader/x-shader">
+        precision mediump float;
+        uniform sampler2D texMap;
+        varying vec2 fTexCoord;
+        uniform bool shadow; 
+        uniform float alpha;
+        void main() {
+            gl_FragColor = vec4(!shadow, !shadow, !shadow, alpha) * texture2D(texMap, fTexCoord);
+        }
+    </script>
+
+
+    <script type="text/javascript" src="./script.js"></script>
+    <script type="text/javascript" src="./MV.js"></script>
+    <script type="text/javascript" src="./webgl-utils.js"></script>
+    <title>W08P4</title>
+
+</head>
+
+<body>
+    <div style="display: flex; flex-direction: row; align-items: center;">
+        <canvas id="c" height="512" width="512"></canvas>
+        <div style="margin: 2rem;">
+            <button id="orbiting">Toggle Orbiting</button>
+        </div>
+    </div>
+
+</body>
+
+
+</html>
