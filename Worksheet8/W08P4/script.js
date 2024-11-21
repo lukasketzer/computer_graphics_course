@@ -86,6 +86,7 @@ window.onload = async () => {
     //gl.enable(gl.CULL_FACE)
     gl.enable(gl.DEPTH_TEST);
     gl.enable(gl.BLEND);
+
     let orbitingButton = document.getElementById("orbiting");
 
     let ext = gl.getExtension("OES_element_index_uint"); // don't remove

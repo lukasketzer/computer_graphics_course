@@ -145,7 +145,6 @@ window.onload = () => {
     // Transformation matrix
     let T = mat4()
 
-
     let PVT = mult(p, mult(v, T))
     gl.uniformMatrix4fv(gl.getUniformLocation(program, "pvt_matrix"), false, flatten(PVT))
 
