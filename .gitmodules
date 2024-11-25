@@ -1,0 +1,3 @@
+[submodule "Project/computer_graphics_project"]
+	path = Project/computer_graphics_project
+	url = git@github.com:nyios/computer_graphics_project.git
