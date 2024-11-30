@@ -95,6 +95,7 @@ window.onload = () => {
     let TLoc = gl.getUniformLocation(program, "t_matrix")
     // cube 1
     M = translate(-1.5, 0, 0)
+    console.log(M)
     R = mat4()
     T = mult(R, M) // R * M Transformation matrix
 
