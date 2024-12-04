@@ -23,22 +23,24 @@ function project_to_sphere(x, y) {
 
 
 function initEventHandlers(canvas, q_rot) {
-    var dragging = false;              // Dragging or not
-    var lastX = -1, lastY = -1;        // Last position of the mouse
+    let dragging = false              // Dragging or not
+    let lastX = -1, lastY = -1;        // Last position of the mouse
     canvas.onmousedown = function (ev) {   // Mouse is pressed
-        var x = ev.clientX, y = ev.clientY;
-
+        let x = ev.clientX, y = ev.clientY;
+        q_rot = q_rot.make_rot_vec2vec(vec3(0, 0, 0), vec3(0,0,0))
         // Start dragging if a mouse is in <canvas> 
         let bbox = ev.target.getBoundingClientRect();
         if (bbox.left <= x && x < bbox.right && bbox.top <= y && y < bbox.bottom) {
             let mouse_pos = vec2(2 * (x - bbox.left) / canvas.width - 1, 2 * (canvas.height - y + bbox.top - 1) / canvas.height - 1);
             lastX = mouse_pos[0]; lastY = mouse_pos[1];
 
-            dragging = true;
+            dragging = true
         }
     };
 
-    canvas.onmouseup = function (ev) { dragging = false; }; // Mouse is released
+    canvas.onmouseup = function (ev) {
+        dragging = false
+    } // Mouse is released
 
     canvas.onmousemove = function (ev) { // Mouse is moved
         let x = ev.clientX, y = ev.clientY;
@@ -50,12 +52,12 @@ function initEventHandlers(canvas, q_rot) {
         if (dragging) {
             u = vec3(lastX, lastY, project_to_sphere(lastX, lastY))
             v = vec3(mouse_pos[0], mouse_pos[1], project_to_sphere(mouse_pos[0], mouse_pos[1]))
-            
-            let q_inc = new Quaternion()
-            q_inc = q_inc.make_rot_vec2vec(normalize(u), normalize(v))
+            u[0] *= -1
+            u[1] *= -1
+            v[0] *= -1
+            v[1] *= -1
 
-            q_rot = q_rot.multiply(q_inc)
-
+            q_rot = q_rot.make_rot_vec2vec(normalize(u), normalize(v))
         }
         lastX = mouse_pos[0], lastY = mouse_pos[1];
     }
@@ -92,42 +94,9 @@ function initDollyingEventHandlers(canvas, z_eye) {
         lastX = mouse_pos[0], lastY = mouse_pos[1];
     }
 }
+
+
 function initPanningEventHandlers(canvas, displacement) {
-    var lastX = -1, lastY = -1;        // Last position of the mouse
-    let dragging = false
-    // Panning event handlers
-    canvas.onmousedown = function (ev) {   // Mouse is pressed
-        var x = ev.clientX, y = ev.clientY;
-
-        // Start dragging if a mouse is in <canvas> 
-        let bbox = ev.target.getBoundingClientRect();
-        if (bbox.left <= x && x < bbox.right && bbox.top <= y && y < bbox.bottom) {
-            let mouse_pos = vec2(2 * (x - bbox.left) / canvas.width - 1, 2 * (canvas.height - y + bbox.top - 1) / canvas.height - 1);
-            lastX = mouse_pos[0]; lastY = mouse_pos[1];
-
-            dragging = true;
-        }
-    }
-    canvas.onmouseup = function (ev) { dragging = false }
-    canvas.onmousemove = function (ev) {
-        let x = ev.clientX, y = ev.clientY;
-        let bbox = ev.target.getBoundingClientRect();
-        let mouse_pos = vec2(2 * (x - bbox.left) / canvas.width - 1, 2 * (canvas.height - y + bbox.top - 1) / canvas.height - 1);
-        let dx = mouse_pos[0] - lastX
-        let dy = mouse_pos[1] - lastY
-        if (dragging) {
-            displacement[0] = dx
-            displacement[1] = dy
-        } else {
-            displacement[0] = 0
-            displacement[1] = 0
-        }
-
-        lastX = mouse_pos[0], lastY = mouse_pos[1];
-    }
-}
-
-function initSpinningEventHandlers(canvas, displacement) {
     var lastX = -1, lastY = -1;        // Last position of the mouse
     let dragging = false
     // Panning event handlers
@@ -419,10 +388,11 @@ window.onload = async () => {
     // Camera Movement 
     ////////////////////////////
     let q_rot = new Quaternion()
-    initEventHandlers(canvas, q_rot)
+    let q_inc = new Quaternion()
+    initEventHandlers(canvas, q_inc)
     let distance = eye[2]
-    eye = vec3(0, 0, distance)
-    at = vec3(0, 0, 0)
+    eye = vec3(eye[0], eye[1] + 1, 5 + distance)
+    at = vec3(0, -1, -3)
     up = vec3(0, 1, 0)
 
     let dollying_eye = structuredClone(eye)
@@ -457,6 +427,8 @@ window.onload = async () => {
         gl.useProgram(program)
         gl.uniform4fv(gl.getUniformLocation(program, "lightPos"), flatten(vec4(lightPos, 1.0)))
 
+        q_rot = q_rot.multiply(q_inc)
+
         switch (modesSelect.value) {
             case "orbiting":
                 v = lookAt(add(q_rot.apply(eye), at), at, q_rot.apply(up))
@@ -474,8 +446,6 @@ window.onload = async () => {
                 at = c
 
                 v = lookAt(add(q_rot.apply(eye), at), at, q_rot.apply(up))
-                break
-            case "spinning":
                 break
         }
 
@@ -580,16 +550,13 @@ window.onload = async () => {
     modesSelect.addEventListener("change", () => {
         switch (modesSelect.value) {
             case "orbiting":
-                initEventHandlers(canvas, q_rot)
+                initEventHandlers(canvas, q_inc)
                 break
             case "dollying":
                 initDollyingEventHandlers(canvas, dollying_eye)
                 break
             case "panning":
                 initPanningEventHandlers(canvas, displacement)
-                break
-            case "spinning":
-                initSpinningEventHandlers(canvas, displacement)
                 break
         }
 

@@ -6,155 +6,132 @@ function setupWebGL(canvas) {
     return WebGLUtils.setupWebGL(canvas);
 }
 
+function project_to_sphere(x, y) {
+    var r = 2;
+    var d = Math.sqrt(x * x + y * y);
+    var t = r * Math.sqrt(2);
+    var z;
+    if (d < r) // Inside sphere
+        z = Math.sqrt(r * r - d * d);
+    else if (d < t)
+        z = 0;
+    else       // On hyperbola
+        z = t * t / d;
+    return z;
+}
+
+
 function initEventHandlers(canvas, q_rot) {
-    var dragging = false; // Dragging or not
-    var lastX = -1, lastY = -1; // Last position of the mouse
-    canvas.onmousedown = function (ev) { // Mouse is pressed
-        var x = ev.clientX, y = ev.clientY;
-
-        // Start dragging if a mouse is in <canvas>
+    let dragging = false              // Dragging or not
+    let lastX = -1, lastY = -1;        // Last position of the mouse
+    canvas.onmousedown = function (ev) {   // Mouse is pressed
+        let x = ev.clientX, y = ev.clientY;
+        // Start dragging if a mouse is in <canvas> 
         let bbox = ev.target.getBoundingClientRect();
-        if (
-            bbox.left <= x && x < bbox.right && bbox.top <= y && y < bbox.bottom
-        ) {
-            let mouse_pos = vec2(
-                2 * (x - bbox.left) / canvas.width - 1,
-                2 * (canvas.height - y + bbox.top - 1) / canvas.height - 1,
-            );
-            lastX = mouse_pos[0];
-            lastY = mouse_pos[1];
+        if (bbox.left <= x && x < bbox.right && bbox.top <= y && y < bbox.bottom) {
+            let mouse_pos = vec2(2 * (x - bbox.left) / canvas.width - 1, 2 * (canvas.height - y + bbox.top - 1) / canvas.height - 1);
+            lastX = mouse_pos[0]; lastY = mouse_pos[1];
 
-            dragging = true;
+            dragging = true
         }
     };
 
     canvas.onmouseup = function (ev) {
-        dragging = false;
-    }; // Mouse is released
+
+        q_rot = q_rot.make_rot_vec2vec(normalize(vec3(1, 1, 1)), normalize(vec3(1, 1, 1)))
+        dragging = false
+    } // Mouse is released
 
     canvas.onmousemove = function (ev) { // Mouse is moved
         let x = ev.clientX, y = ev.clientY;
         let bbox = ev.target.getBoundingClientRect();
-        let mouse_pos = vec2(
-            2 * (x - bbox.left) / canvas.width - 1,
-            2 * (canvas.height - y + bbox.top - 1) / canvas.height - 1,
-        );
+        let mouse_pos = vec2(2 * (x - bbox.left) / canvas.width - 1, 2 * (canvas.height - y + bbox.top - 1) / canvas.height - 1);
 
-        let u, v;
+        let u, v
 
         if (dragging) {
-            let d = Math.sqrt(lastX * lastX + lastY * lastY);
-            if (d <= 1.0 / Math.sqrt(2)) {
-                u = vec3(lastX, lastY, Math.sqrt(1 - d * d));
-            } else {
-                u = vec3(lastX, lastY, 1 / (2 * d));
-            }
+            u = vec3(lastX, lastY, project_to_sphere(lastX, lastY))
+            v = vec3(mouse_pos[0], mouse_pos[1], project_to_sphere(mouse_pos[0], mouse_pos[1]))
+            u[0] *= -1
+            u[1] *= -1
+            v[0] *= -1
+            v[1] *= -1
 
-            d = Math.sqrt(
-                mouse_pos[0] * mouse_pos[0] + mouse_pos[1] * mouse_pos[1],
-            );
-            if (d <= 1.0 / Math.sqrt(2)) {
-                v = vec3(mouse_pos[0], mouse_pos[1], Math.sqrt(1 - d * d));
-            } else {
-                v = vec3(mouse_pos[0], mouse_pos[1], 1 / (2 * d));
-            }
-            u[0] = u[0] / 3;
-            u[1] = u[1] / 3;
-            v[0] = v[0] / 3;
-            v[1] = v[1] / 3;
-            let q_inc = new Quaternion();
-            q_inc = q_inc.make_rot_vec2vec(normalize(u), normalize(v));
-            q_rot = q_rot.multiply(q_inc);
+            q_rot = q_rot.make_rot_vec2vec(normalize(u), normalize(v))
         }
+
         lastX = mouse_pos[0], lastY = mouse_pos[1];
-    };
+    }
+
 }
+
+
 
 function initDollyingEventHandlers(canvas, z_eye) {
-    var lastX = -1, lastY = -1; // Last position of the mouse
-    let dragging = false;
+    var lastX = -1, lastY = -1;        // Last position of the mouse
+    let dragging = false
     // Panning event handlers
-    canvas.onmousedown = function (ev) { // Mouse is pressed
+    canvas.onmousedown = function (ev) {   // Mouse is pressed
         var x = ev.clientX, y = ev.clientY;
 
-        // Start dragging if a mouse is in <canvas>
+        // Start dragging if a mouse is in <canvas> 
         let bbox = ev.target.getBoundingClientRect();
-        if (
-            bbox.left <= x && x < bbox.right && bbox.top <= y && y < bbox.bottom
-        ) {
-            let mouse_pos = vec2(
-                2 * (x - bbox.left) / canvas.width - 1,
-                2 * (canvas.height - y + bbox.top - 1) / canvas.height - 1,
-            );
-            lastX = mouse_pos[0];
-            lastY = mouse_pos[1];
+        if (bbox.left <= x && x < bbox.right && bbox.top <= y && y < bbox.bottom) {
+            let mouse_pos = vec2(2 * (x - bbox.left) / canvas.width - 1, 2 * (canvas.height - y + bbox.top - 1) / canvas.height - 1);
+            lastX = mouse_pos[0]; lastY = mouse_pos[1];
 
             dragging = true;
         }
-    };
-    canvas.onmouseup = function (ev) {
-        dragging = false;
-    };
+    }
+    canvas.onmouseup = function (ev) { dragging = false }
 
     canvas.onmousemove = function (ev) {
         let x = ev.clientX, y = ev.clientY;
         let bbox = ev.target.getBoundingClientRect();
-        let mouse_pos = vec2(
-            2 * (x - bbox.left) / canvas.width - 1,
-            2 * (canvas.height - y + bbox.top - 1) / canvas.height - 1,
-        );
-        let d = mouse_pos[1] - lastY;
+        let mouse_pos = vec2(2 * (x - bbox.left) / canvas.width - 1, 2 * (canvas.height - y + bbox.top - 1) / canvas.height - 1);
+        let d = mouse_pos[1] - lastY
         if (dragging) {
-            z_eye[2] += d;
+            z_eye[2] += d
         }
 
         lastX = mouse_pos[0], lastY = mouse_pos[1];
-    };
+    }
 }
+
+
 function initPanningEventHandlers(canvas, displacement) {
-    var lastX = -1, lastY = -1; // Last position of the mouse
-    let dragging = false;
+    var lastX = -1, lastY = -1;        // Last position of the mouse
+    let dragging = false
     // Panning event handlers
-    canvas.onmousedown = function (ev) { // Mouse is pressed
+    canvas.onmousedown = function (ev) {   // Mouse is pressed
         var x = ev.clientX, y = ev.clientY;
 
-        // Start dragging if a mouse is in <canvas>
+        // Start dragging if a mouse is in <canvas> 
         let bbox = ev.target.getBoundingClientRect();
-        if (
-            bbox.left <= x && x < bbox.right && bbox.top <= y && y < bbox.bottom
-        ) {
-            let mouse_pos = vec2(
-                2 * (x - bbox.left) / canvas.width - 1,
-                2 * (canvas.height - y + bbox.top - 1) / canvas.height - 1,
-            );
-            lastX = mouse_pos[0];
-            lastY = mouse_pos[1];
+        if (bbox.left <= x && x < bbox.right && bbox.top <= y && y < bbox.bottom) {
+            let mouse_pos = vec2(2 * (x - bbox.left) / canvas.width - 1, 2 * (canvas.height - y + bbox.top - 1) / canvas.height - 1);
+            lastX = mouse_pos[0]; lastY = mouse_pos[1];
 
             dragging = true;
         }
-    };
-    canvas.onmouseup = function (ev) {
-        dragging = false;
-    };
+    }
+    canvas.onmouseup = function (ev) { dragging = false }
     canvas.onmousemove = function (ev) {
         let x = ev.clientX, y = ev.clientY;
         let bbox = ev.target.getBoundingClientRect();
-        let mouse_pos = vec2(
-            2 * (x - bbox.left) / canvas.width - 1,
-            2 * (canvas.height - y + bbox.top - 1) / canvas.height - 1,
-        );
-        let dx = mouse_pos[0] - lastX;
-        let dy = mouse_pos[1] - lastY;
+        let mouse_pos = vec2(2 * (x - bbox.left) / canvas.width - 1, 2 * (canvas.height - y + bbox.top - 1) / canvas.height - 1);
+        let dx = mouse_pos[0] - lastX
+        let dy = mouse_pos[1] - lastY
         if (dragging) {
-            displacement[0] = dx;
-            displacement[1] = dy;
+            displacement[0] = dx
+            displacement[1] = dy
         } else {
-            displacement[0] = 0;
-            displacement[1] = 0;
+            displacement[0] = 0
+            displacement[1] = 0
         }
 
         lastX = mouse_pos[0], lastY = mouse_pos[1];
-    };
+    }
 }
 
 function setShininess(program, shininess) {
@@ -462,10 +439,11 @@ window.onload = async () => {
     // Camera Movement
     ////////////////////////////
     let q_rot = new Quaternion();
-    initEventHandlers(canvas, q_rot);
+    let q_inc = new Quaternion();
+    initEventHandlers(canvas, q_inc);
     let distance = eye[2];
-    eye = vec3(0, 0, distance);
-    at = vec3(0, 0, 0);
+    eye = vec3(eye[0], eye[1] + 1, 5 + distance);
+    at = vec3(0, -1, -3);
     up = vec3(0, 1, 0);
 
     let dollying_eye = structuredClone(eye);
@@ -498,36 +476,25 @@ window.onload = async () => {
             gl.getUniformLocation(program, "lightPos"),
             flatten(vec4(lightPos, 1.0)),
         );
-
+        q_rot = q_rot.multiply(q_inc);
         switch (modesSelect.value) {
             case "orbiting":
-                // eye[2] = dollying_eye[2]
-                v = lookAt(add(q_rot.apply(eye), at), at, q_rot.apply(up));
-                // v = lookAt(q_rot.apply(eye), at, up)
+                v = lookAt(add(q_rot.apply(eye), at), at, q_rot.apply(up))
                 break;
             case "dollying":
-                // distance = Math.abs(dollying_eye[2] - at[2])
-                eye[2] = dollying_eye[2];
-                v = lookAt(add(q_rot.apply(eye), at), at, q_rot.apply(up));
-                // eye[2] = distance + at[2]
+                v = lookAt(add(q_rot.apply(eye), at), at, q_rot.apply(up))
+                eye[2] = dollying_eye[2]
                 break;
             case "panning":
-                // displacement[0] =
-                x = q_rot.apply(vec3(1, 0, 0));
-                y = q_rot.apply(up);
-                x = mult(
-                    vec3(displacement[0], displacement[0], displacement[0]),
-                    x,
-                );
-                y = mult(
-                    vec3(displacement[1], displacement[1], displacement[1]),
-                    y,
-                );
-                c = subtract(at, add(x, y));
-                at = c;
+                x = q_rot.apply(vec3(1, 0, 0))
+                y = q_rot.apply(up)
+                x = mult(vec3(displacement[0], displacement[0], displacement[0]), x)
+                y = mult(vec3(displacement[1], displacement[1], displacement[1]), y)
+                c = subtract(at, add(x, y))
+                at = c
 
-                v = lookAt(add(q_rot.apply(eye), at), at, q_rot.apply(up));
-                break;
+                v = lookAt(add(q_rot.apply(eye), at), at, q_rot.apply(up))
+                break
         }
 
         if (ready_textures >= total_textures) {
@@ -640,7 +607,7 @@ window.onload = async () => {
     modesSelect.addEventListener("change", () => {
         switch (modesSelect.value) {
             case "orbiting":
-                initEventHandlers(canvas, q_rot);
+                initEventHandlers(canvas, q_inc);
                 break;
             case "dollying":
                 initDollyingEventHandlers(canvas, dollying_eye);
@@ -651,4 +618,3 @@ window.onload = async () => {
         }
     });
 };
-
