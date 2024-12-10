@@ -66,8 +66,6 @@ window.onload = async () => {
     gl = setupWebGL(canvas);
     let program = initShaders(gl, "vertex-shader", "fragment-shader");
 
-    let incrementButton = document.getElementById("increment")
-    let decrementButton = document.getElementById("decrement")
     let orbitingButton = document.getElementById("orbiting")
 
     gl.enable(gl.CULL_FACE)
